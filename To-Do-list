@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <!-- Main Columns and some CSS settings for the style -->
+    <div class="flex flex-row p-10 m-10 h-[700px] gap-10">
+      <div class="colonna rounded-xl bg-slate-200 p-10 w-80 flex flex-col gap-4 justify-start" data-column="0">
+        <h2 class="text-2xl text-center font-bold mb-4">To-Do List</h2>
+      </div>
+      <div class="colonna rounded-xl bg-slate-200 p-10 w-80 flex flex-col gap-4 justify-start" data-column="1">
+        <h2 class="text-2xl text-center font-bold mb-4">Work in Progress</h2>
+      </div>
+      <div class="colonna rounded-xl bg-slate-200 p-10 w-80 flex flex-col gap-4 justify-start" data-column="2">
+        <h2 class="text-2xl text-center font-bold mb-4">Revision</h2>
+      </div>
+      <div class="colonna rounded-xl bg-slate-200 p-10 w-80 flex flex-col gap-4 justify-start" data-column="3">
+        <h2 class="text-2xl text-center font-bold mb-4">Completed</h2>
+      </div>
+    </div>
+
+    <!-- Button to add an activity -->
+    <div>
+      <button class="rounded-xl bg-blue-500 text-white p-4 w-40" onclick="openModal()">Add an activity</button>
+    </div>
+
+    <!-- Hidden modal for adding tasks - Gets visible upon pression "Add an activity" -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center">
+      <div class="bg-white p-6 rounded-lg">
+        <h2 class="text-xl font-bold mb-4">Add New Activity</h2>
+        <input id="taskInput" type="text" class="border border-gray-300 p-2 w-full mb-4" placeholder="Enter activity name" />
+        <div class="flex justify-end">
+          <button class="bg-green-500 text-white p-2 rounded mr-2" onclick="addActivity()">OK</button>
+          <button class="bg-red-500 text-white p-2 rounded" onclick="closeModal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert for double-click info -->
+    <div class="p-4 bg-yellow-200 text-black text-center">
+      <p>Double-click a task to delete it!</p>
+    </div>
+
+    <script>
+      let data = localStorage.getItem("data")
+        ? JSON.parse(localStorage.getItem("data"))
+        : placeholderData;
+
+      // Function to open the modal
+      function openModal() {
+        document.getElementById("modal").classList.remove("hidden");
+      }
+
+      // Function to close the modal
+      function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+      }
+
+      // Function to add the activity to the To-Do list and keep draggable functionality
+      function addActivity() {
+        const taskName = document.getElementById("taskInput").value;
+        if (taskName) {
+          const toDoListColumn = document.querySelector("[data-column='0']"); //first column (column 0)
+          const newTask = document.createElement("div");
+          newTask.className = "task p-4 rounded-xl shadow-xl bg-white";
+          newTask.setAttribute("draggable", true);
+          newTask.textContent = taskName;
+          toDoListColumn.appendChild(newTask);
+
+          // Add draggable and double-click event listeners to the new task
+          newTask.addEventListener("dragstart", dragStart);
+          newTask.addEventListener("dragend", dragEnd);
+          newTask.addEventListener("dblclick", deleteTask);
+
+          // Optional: clear the input field
+          document.getElementById("taskInput").value = "";
+
+          // Close the modal after adding the task
+          closeModal();
+        }
+      }
+
+      // Function to delete a task on double-click
+      function deleteTask(event) {
+        if (confirm("Are you sure you want to delete this task?")) {
+          event.target.remove();
+        }
+      }
+
+      // Initial placeholder data (example)
+      const placeholderData = [
+        { id: 0, name: "To-Do List", tasks: [] },
+        { id: 1, name: "Work in Progress", tasks: [] },
+        { id: 2, name: "Under Revision", tasks: [] },
+        { id: 3, name: "Completed", tasks: [] },
+      ];
+
+      // Event handlers for drag and drop
+      let dragItem = null;
+      let dragData = null;
+
+      const columns = document.querySelectorAll(".colonna");
+
+      columns.forEach((colonna) => {
+        colonna.addEventListener("dragover", dragOver);
+        //colonna.addEventListener("dragenter", dragEnter);
+        //colonna.addEventListener("dragleave", dragLeave);
+        colonna.addEventListener("drop", dragDrop);
+      });
+
+      function dragOver(e) {
+        e.preventDefault();
+        console.log("dragOver");
+      }
+      function dragDrop() {
+        console.log("dragDrop");
+        this.append(dragItem); // Append the dragged item to the new column
+      }
+
+      function dragStart() {
+        console.log("dragStart");
+        setTimeout(() => this.classList.add("hidden"), 0);
+        dragItem = this;
+      }
+
+      function dragEnd() {
+        this.classList.remove("hidden");
+        console.log("dragEnd");
+        dragItem = null;
+      }
+
+      function dragEnter() {
+        console.log("dragEnter");
+      }
+
+      function dragLeave() {
+        console.log("dragLeave");
+      }
+
+
+    </script>
+  </body>
+</html>
